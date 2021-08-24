@@ -38,3 +38,14 @@ M(3).Mat = "2045Aluminum";
 M(3).rho = 2.7e3;
 M(3).E = 73e9;
 M(3).sigma_max = 450e6;
+
+%% Design Variables:
+% X = [l_l; theta_l; h_b; w_b; t_b]
+
+l_b = [P.h_l,0,0,0,0]';
+u_b = [Inf,pi/2,Inf,Inf,Inf]';
+
+theta_l_0 = deg2rad(45);
+l_l_0 = P.h_l/sin(theta_l_0);
+X0 = [l_l_0, theta_l_0, 0.2, 0.1, 0.01]'; % Start with large beam profile so constraints are satisfied
+X0s = vec2struct(X0);

@@ -1,24 +1,29 @@
 function S = calcBeam(Xs,P,M)
+l_l = P.h_l / sin(Xs.theta_l);
+
 % Beam Constant
 [A_b,I_b] = beamProfile(Xs.w_b, Xs.h_b, Xs.t_b);
 S.A_b = A_b;
 S.I_b = I_b;
 
 % Mass
-S.beam_mass = beamMass(Xs.l_l, A_b, M.rho);
+S.beam_mass = beamMass(l_l, A_b, M.rho);
 
-[F_g, ~, F_p] = solveStaticForces(Xs.l_l,Xs.theta_l, P.w_p);
-F_p_prime_y = F_p(2)*cos(Xs.theta_l); % Component of force perpendicular to beam
+[F_g, F_w, F_p] = solveStaticForces(l_l,Xs.theta_l, P.w_p);
+F_p_prime_y = F_p(2)*cos(Xs.theta_l); % Transverse component of force (perpendicular to beam)
 
 % Bending
-S.delta = abs(F_p_prime_y*(Xs.l_l)^3/(48*M.E*I_b)); % Deflection at center
+S.delta = abs(F_p_prime_y*(l_l)^3/(48*M.E*I_b)); % Deflection at center
 
-M_max = abs(F_p_prime_y*Xs.l_l/4); % Bending moment
+M_max = abs(F_p_prime_y*l_l/4); % Bending moment
 sigma = M_max*(Xs.h_b/2)/I_b; % Bending stress
 S.N_sigma = M.sigma_max / sigma; % Safety Factor
 
 % Slippage!
 S.slip_margin = P.mu_g * abs(F_g(2)) - abs(F_g(1));
+
+% Tippage!
+S.tip_margin = abs(F_w(1));
 end
 
 function [m] = beamMass(l_l, A_b, rho)
